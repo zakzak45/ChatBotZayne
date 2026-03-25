@@ -3,6 +3,8 @@ import Zaynejr from './zaynejr.json'
 import './Zaynejr.css'
 
 const STORAGE_KEY = "zaynejr_chat_history";
+const LEARNED_KEY = "zaynejr_learned";
+const THEME_KEY = "zaynejr_theme";
 
 const normalize = (text) =>
   text
@@ -38,6 +40,14 @@ const scoreEntry = (entry, inputText, inputTokens) => {
 };
 
 const Chat = () => {
+  const [theme, setTheme] = useState(() => {
+    const stored = localStorage.getItem(THEME_KEY);
+    if (stored === "light" || stored === "dark") return stored;
+    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      return "dark";
+    }
+    return "light";
+  });
   const [messages, setMessages] = useState(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
@@ -57,9 +67,25 @@ const Chat = () => {
   });
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [pendingQuestion, setPendingQuestion] = useState(null);
+  const [learnedEntries, setLearnedEntries] = useState(() => {
+    const stored = localStorage.getItem(LEARNED_KEY);
+    if (!stored) return [];
+    try {
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
   const messagesEndRef = useRef(null);
 
-  const entries = useMemo(() => Zaynejr, []);
+  const entries = useMemo(() => [...Zaynejr, ...learnedEntries], [learnedEntries]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
@@ -79,6 +105,40 @@ const Chat = () => {
     setInput("");
     setIsTyping(true);
 
+    if (pendingQuestion) {
+      const trimmed = input.trim();
+      const lower = trimmed.toLowerCase();
+
+      if (lower === "/skip" || lower === "skip") {
+        const response = "Got it. Ask me something else anytime.";
+        window.setTimeout(() => {
+          const botMessage = { sender: "bot", text: response, time: Date.now() };
+          setMessages((prev) => [...prev, botMessage]);
+          setIsTyping(false);
+          setPendingQuestion(null);
+        }, 600);
+        return;
+      }
+
+      const newEntry = {
+        question: pendingQuestion,
+        keywords: [],
+        answer: trimmed
+      };
+      const updated = [...learnedEntries, newEntry];
+      setLearnedEntries(updated);
+      localStorage.setItem(LEARNED_KEY, JSON.stringify(updated));
+
+      const response = "Nice, I learned that. Ask me again anytime.";
+      window.setTimeout(() => {
+        const botMessage = { sender: "bot", text: response, time: Date.now() };
+        setMessages((prev) => [...prev, botMessage]);
+        setIsTyping(false);
+        setPendingQuestion(null);
+      }, 700);
+      return;
+    }
+
     const inputText = normalize(input);
     const inputTokens = tokenize(inputText);
 
@@ -95,7 +155,11 @@ const Chat = () => {
 
     const response = bestMatch && bestScore >= 3
       ? bestMatch.answer
-      : "Hmm... I do not know that yet. Try asking something else.";
+      : "I do not know that yet. Want to teach me? Reply with the answer or type /skip.";
+
+    if (!bestMatch || bestScore < 3) {
+      setPendingQuestion(input);
+    }
 
     const delay = Math.min(800 + response.length * 10, 1600);
     window.setTimeout(() => {
@@ -121,14 +185,27 @@ const Chat = () => {
               <p className="chat-status">Online and ready</p>
             </div>
           </div>
-          <button
-            className="ghost-button"
-            onClick={() => setMessages([{ sender: "bot", text: "Hey, I'm ZayneJr! Ask me something.", time: Date.now() }])}
-            type="button"
-            aria-label="Clear conversation"
-          >
-            Clear
-          </button>
+          <div className="chat-actions">
+            <button
+              className="ghost-button"
+              onClick={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
+              type="button"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? "Light mode" : "Dark mode"}
+            </button>
+            <button
+              className="ghost-button"
+              onClick={() => {
+                setMessages([{ sender: "bot", text: "Hey, I'm ZayneJr! Ask me something.", time: Date.now() }]);
+                setPendingQuestion(null);
+              }}
+              type="button"
+              aria-label="Clear conversation"
+            >
+              Clear
+            </button>
+          </div>
         </header>
 
         <div className="chat-container">

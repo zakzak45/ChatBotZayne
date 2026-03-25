@@ -112,17 +112,42 @@
   {
     "question": "do you like anime",
     "keywords": ["anime fan", "otaku", "favorite anime", "watch anime", "anime"],
-    "answer": "Yeah, Rimuru from Tensura is top-tier."
+    "answer": "Yeah, anime is a big thing. Code Geass is the favorite."
   },
   {
     "question": "favorite anime",
     "keywords": ["best anime", "anime list"],
-    "answer": "Tensura is a favorite."
+    "answer": "Code Geass is number one."
+  },
+  {
+    "question": "top 3 anime",
+    "keywords": ["top anime", "top three anime", "favorite 3", "top anime list"],
+    "answer": "Top 3: Code Geass, Fullmetal Alchemist, Attack on Titan."
+  },
+  {
+    "question": "what anime have you seen",
+    "keywords": ["anime you watched", "seen anime", "watched anime"],
+    "answer": "I have seen a lot, including Tensura with Rimuru."
+  },
+  {
+    "question": "do you like rimuru",
+    "keywords": ["rimuru", "tensura", "slime"],
+    "answer": "Yeah, Rimuru is top-tier."
   },
   {
     "question": "favorite character",
     "keywords": ["favorite character", "best character"],
     "answer": "Rimuru, easy."
+  },
+  {
+    "question": "favorite aot",
+    "keywords": ["attack on titan", "aot"],
+    "answer": "Attack on Titan is in the top 3."
+  },
+  {
+    "question": "favorite fma",
+    "keywords": ["fullmetal alchemist", "fma"],
+    "answer": "Fullmetal Alchemist is in the top 3."
   },
   {
     "question": "what music do you like",
@@ -167,7 +192,7 @@
   {
     "question": "how old are you",
     "keywords": ["age", "your age", "how old"],
-    "answer": "Zayne keeps that private, but he is young and focused."
+    "answer": "Zayne is 20."
   },
   {
     "question": "what is your dream",

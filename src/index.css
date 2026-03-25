@@ -4,12 +4,23 @@
   font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #111827;
-  background-color: #eef2f3;
+  color: var(--text-color);
+  background-color: var(--page-bg-solid);
+  --text-color: #111827;
+  --page-bg-solid: #eef2f3;
+  --page-bg: radial-gradient(circle at top, rgba(14, 165, 233, 0.2), transparent 60%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2f3 60%, #e2e8f0 100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="dark"] {
+  --text-color: #e2e8f0;
+  --page-bg-solid: #0b1120;
+  --page-bg: radial-gradient(circle at top, rgba(56, 189, 248, 0.12), transparent 60%),
+    linear-gradient(180deg, #0b1120 0%, #0f172a 60%, #111827 100%);
 }
 
 * {
@@ -20,8 +31,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: radial-gradient(circle at top, rgba(14, 165, 233, 0.2), transparent 60%),
-    linear-gradient(180deg, #f8fafc 0%, #eef2f3 60%, #e2e8f0 100%);
+  color: var(--text-color);
+  background: var(--page-bg);
 }
 
 button {

@@ -2,12 +2,26 @@
   --ink: #111827;
   --muted: #6b7280;
   --panel: #f8fafc;
+  --surface: #ffffff;
   --accent: #0f766e;
   --accent-strong: #0b4a46;
   --bubble-user: #0ea5e9;
   --bubble-bot: #e2e8f0;
   --stroke: rgba(15, 23, 42, 0.15);
   --shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
+}
+
+[data-theme="dark"] {
+  --ink: #e2e8f0;
+  --muted: #94a3b8;
+  --panel: #0f172a;
+  --surface: #111827;
+  --accent: #38bdf8;
+  --accent-strong: #0ea5e9;
+  --bubble-user: #38bdf8;
+  --bubble-bot: #1e293b;
+  --stroke: rgba(148, 163, 184, 0.2);
+  --shadow: 0 20px 60px rgba(2, 6, 23, 0.55);
 }
 
 .chat-shell {
@@ -27,6 +41,12 @@
   border: 1px solid rgba(15, 118, 110, 0.2);
   box-shadow: var(--shadow);
   backdrop-filter: blur(6px);
+}
+
+.chat-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .chat-brand {
@@ -62,7 +82,7 @@
 
 .ghost-button {
   border: 1px solid rgba(15, 118, 110, 0.25);
-  background: white;
+  background: var(--surface);
   color: var(--accent-strong);
   padding: 8px 16px;
   border-radius: 999px;
@@ -142,6 +162,10 @@
   color: rgba(15, 23, 42, 0.6);
 }
 
+[data-theme="dark"] .chat-time {
+  color: rgba(226, 232, 240, 0.75);
+}
+
 .chat-message.user .chat-time {
   color: rgba(255, 255, 255, 0.75);
 }
@@ -173,7 +197,7 @@
 .chat-input {
   display: flex;
   gap: 8px;
-  background: white;
+  background: var(--surface);
   border-radius: 14px;
   padding: 8px;
   border: 1px solid var(--stroke);
