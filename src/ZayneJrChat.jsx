@@ -1,63 +1,173 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Zaynejr from './zaynejr.json'
 import './Zaynejr.css'
 
-const Chat = () => {
- const [messages, setMessages] = useState([
-    { sender: "bot", text: "Hey, I'm ZayneJr! Ask me something " }
-  ]);
-const [input, setInput] = useState("");
-const handleSend = () => {
-  if (!input.trim()) return;
+const STORAGE_KEY = "zaynejr_chat_history";
 
-  const userMessage = { sender: "user", text: input };
-  setMessages((prev) => [...prev, userMessage]);
+const normalize = (text) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
- 
-  const lowerInput = input.toLowerCase();
+const tokenize = (text) => (text ? normalize(text).split(" ") : []);
 
-  const match = Zaynejr.find(
-    (entry) =>
-      lowerInput.includes(entry.question.toLowerCase()) ||
-      entry.keywords?.some((kw) => lowerInput.includes(kw.toLowerCase()))
-  );
+const scoreEntry = (entry, inputText, inputTokens) => {
+  const questionText = normalize(entry.question || "");
+  const keywordTokens = (entry.keywords || []).flatMap((kw) => tokenize(kw));
+  const questionTokens = tokenize(questionText);
+  const allTokens = [...new Set([...questionTokens, ...keywordTokens])];
 
-  const response = match
-    ? match.answer
-    : "Hmm... I don’t know that yet ,try asking something else";
+  let score = 0;
+  if (!questionText) return score;
 
-  const botMessage = { sender: "bot", text: response };
-  setMessages((prev) => [...prev, botMessage]);
-  setInput("");
+  if (inputText.includes(questionText)) score += 6;
+
+  const tokenMatches = inputTokens.filter((token) => allTokens.includes(token)).length;
+  score += tokenMatches * 2;
+
+  const partialMatches = allTokens.filter((token) =>
+    inputTokens.some((inputToken) =>
+      inputToken.length >= 4 && (inputToken.includes(token) || token.includes(inputToken))
+    )
+  ).length;
+  score += partialMatches;
+
+  return score;
 };
 
-       return ( 
-        <>
-        <h1 id="heading">ZayneJr</h1>
-         <div className="chat-container">
-      <div className="chat-messages">
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`chat-message ${msg.sender === "bot" ? "bot" : "user"}`}
-          >
-            {msg.text}
-          </div>
-        ))}
-      </div>
+const Chat = () => {
+  const [messages, setMessages] = useState(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length) {
+          return parsed.map((msg) => ({
+            ...msg,
+            time: msg.time || Date.now()
+          }));
+        }
+      } catch {
+        return [{ sender: "bot", text: "Hey, I'm ZayneJr! Ask me something.", time: Date.now() }];
+      }
+    }
+    return [{ sender: "bot", text: "Hey, I'm ZayneJr! Ask me something.", time: Date.now() }];
+  });
+  const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef(null);
 
-      <div className="chat-input">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder="Type a message..."
-        />
-        <button onClick={handleSend}>Send</button>
+  const entries = useMemo(() => Zaynejr, []);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  }, [messages]);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isTyping]);
+
+  const handleSend = () => {
+    if (!input.trim() || isTyping) return;
+
+    const userMessage = { sender: "user", text: input, time: Date.now() };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsTyping(true);
+
+    const inputText = normalize(input);
+    const inputTokens = tokenize(inputText);
+
+    let bestMatch = null;
+    let bestScore = 0;
+
+    for (const entry of entries) {
+      const score = scoreEntry(entry, inputText, inputTokens);
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = entry;
+      }
+    }
+
+    const response = bestMatch && bestScore >= 3
+      ? bestMatch.answer
+      : "Hmm... I do not know that yet. Try asking something else.";
+
+    const delay = Math.min(800 + response.length * 10, 1600);
+    window.setTimeout(() => {
+      const botMessage = { sender: "bot", text: response, time: Date.now() };
+      setMessages((prev) => [...prev, botMessage]);
+      setIsTyping(false);
+    }, delay);
+  };
+
+  const formatTime = (timestamp) => {
+    if (!timestamp) return "";
+    return new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  return (
+    <>
+      <div className="chat-shell">
+        <header className="chat-header">
+          <div className="chat-brand">
+            <div className="chat-avatar">ZJ</div>
+            <div>
+              <h1 className="chat-title">ZayneJr</h1>
+              <p className="chat-status">Online and ready</p>
+            </div>
+          </div>
+          <button
+            className="ghost-button"
+            onClick={() => setMessages([{ sender: "bot", text: "Hey, I'm ZayneJr! Ask me something.", time: Date.now() }])}
+            type="button"
+            aria-label="Clear conversation"
+          >
+            Clear
+          </button>
+        </header>
+
+        <div className="chat-container">
+          <div className="chat-messages">
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={`chat-message ${msg.sender === "bot" ? "bot" : "user"}`}
+              >
+                <p>{msg.text}</p>
+                {msg.time ? <span className="chat-time">{formatTime(msg.time)}</span> : null}
+              </div>
+            ))}
+            {isTyping && (
+              <div className="chat-message bot">
+                <div className="typing">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="chat-input">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              placeholder="Type a message..."
+              aria-label="Chat message"
+            />
+            <button onClick={handleSend} type="button">Send</button>
+          </div>
+        </div>
       </div>
-    </div>
-        </>
-     );
+    </>
+  );
 }
  
 export default Chat;
