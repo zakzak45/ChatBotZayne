@@ -61,10 +61,15 @@
   border-radius: 16px;
   display: grid;
   place-items: center;
-  font-weight: 700;
-  color: white;
-  background: linear-gradient(135deg, #0f766e, #0ea5e9);
+  background: var(--surface);
   box-shadow: 0 10px 30px rgba(14, 165, 233, 0.35);
+  overflow: hidden;
+}
+
+.chat-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .chat-title {

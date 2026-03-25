@@ -179,7 +179,9 @@ const Chat = () => {
       <div className="chat-shell">
         <header className="chat-header">
           <div className="chat-brand">
-            <div className="chat-avatar">ZJ</div>
+            <div className="chat-avatar">
+              <img src="/Pikachu.png" alt="Zayne profile" />
+            </div>
             <div>
               <h1 className="chat-title">ZayneJr</h1>
               <p className="chat-status">Online and ready</p>

@@ -135,6 +135,11 @@
     "answer": "Yeah, Rimuru is top-tier."
   },
   {
+    "question": "anime profile pikachu",
+    "keywords": ["pikachu", "pokemon", "anime profile", "pikachu profile"],
+    "answer": "Pikachu is the iconic Pokemon from the anime. It is an Electric-type, Ash's main partner, and known for its loyalty, quick attacks, and the move Thunderbolt."
+  },
+  {
     "question": "favorite character",
     "keywords": ["favorite character", "best character"],
     "answer": "Rimuru, easy."
@@ -188,6 +193,11 @@
     "question": "what do you look like",
     "keywords": ["appearance", "face", "describe yourself", "looks"],
     "answer": "Imagine Zayne, but in binary."
+  },
+  {
+    "question": "profile",
+    "keywords": ["my profile", "about zayne", "zayne profile", "profile section"],
+    "answer": "Zayne is 20, a CS-focused student who loves coding and low-level concepts. Anime favorites: Code Geass (top), with Top 3 being Code Geass, Fullmetal Alchemist, and Attack on Titan. Rimuru is a favorite character from Tensura."
   },
   {
     "question": "how old are you",
